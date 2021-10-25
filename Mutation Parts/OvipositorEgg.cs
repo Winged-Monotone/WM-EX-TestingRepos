@@ -23,11 +23,33 @@ namespace XRL.World.Parts
             {
                 // string Hatched = "Crack!";
                 OvipositorHandler = ParentObject;
+                var MothersGenes = Mother.GetPart<Ovipositor>();
 
                 GameObject Droneling = Cloning.GenerateClone(Mother, C: currentCell);
                 var CheckOvi = Droneling.GetPart<Mutations>();
                 var GetOvi = CheckOvi.GetMutation("Ovipositor");
+
                 CheckOvi.RemoveMutation(GetOvi);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var spice = MothersGenes.CollectedGeneSpice.GetRandomElement();
+                    if (spice == null) break;
+
+                    // check & add spice mutations here
+
+                    // AddPlayerMessage("Preparing GeneSpicing");
+
+                    if (!CheckOvi.HasMutation(spice))
+                    {
+                        // AddPlayerMessage("Gene 1");
+
+                        CheckOvi.AddMutation(spice, 1);
+                    }
+
+                }
+
+
                 Droneling.DisplayName = Names.MutantNameMaker.MakeMutantName();
                 Droneling.GetPart<Description>().Short = "One of your loyal drones.";
                 Droneling.RemoveIntProperty("ProperNoun");
@@ -39,10 +61,10 @@ namespace XRL.World.Parts
             }
         }
 
-        public override bool WantEvent(int ID, int cascade)
-        {
-            return base.WantEvent(ID, cascade) || ID == GetDisplayNameEvent.ID;
-        }
+        public override bool WantEvent(int ID, int cascade) =>
+            ID == GetDisplayNameEvent.ID ||
+            base.WantEvent(ID, cascade);
+
 
         public override bool HandleEvent(GetDisplayNameEvent E)
         {

@@ -61,11 +61,16 @@ namespace XRL.World.Parts.Mutation
 
         public override string GetLevelText(int Level)
         {
-            return "Base Damage: {{light blue|" + GetDamage(Level, 1) + "}} Per Charge.\n"
-            + "Charges above the first used increase the cooldown of this mutation by 25.\n"
-            + "\n"
-            + "Due to the amount of concentration it requires to perform this ability, attempting to project this beam while &Wdazed &Yor &Wconfused &Yhas &Rfatal &Rconsequences&y.\n\n"
-            + "The beam projects itself from the forehead, attempting to project this beam while wearing a helmet also has &Rfatal &Rconsequences&y.";
+            if (Level == base.Level)
+                return "Base Damage: {{cyan|" + GetDamage(Level, 1) + "}} Per Charge.\n"
+                + "Charges above the first used increase the cooldown of this mutation by {{cyan|25}}.\n"
+                + "\n"
+                + "Due to the amount of concentration it requires to perform this ability, attempting to project this beam while &Wdazed &Yor &Wconfused &Yhas &Rfatal &Rconsequences&y.\n\n"
+                + "The beam projects itself from the forehead, attempting to project this beam while wearing a helmet also has &Rfatal &Rconsequences&y.";
+            else
+            {
+                return "Base Damage: {{cyan|" + GetDamage(Level, 1) + "}} Per Charge.\n";
+            }
         }
         public int GetForce(int Level, int Charges)
         {
@@ -111,12 +116,12 @@ namespace XRL.World.Parts.Mutation
                     AddPlayerMessage("That's not a valid amount of charges.");
                     return;
                 }
-                if (Charges > 1 + ParentsEgoMod + ParentsLevelMod && !ParentObject.HasEffect("Psiburdening"))
+                if (Charges > 1 + ParentsEgoMod + ParentsLevelMod / 3 && !ParentObject.HasEffect("Psiburdening"))
                 {
                     int fatigueVar = 25;
                     ParentObject.ApplyEffect(new Psiburdening(fatigueVar * Charges));
                 }
-                ActuallyFire(Charges);
+                ActuallyFire(1);
             }
         }
 
@@ -148,14 +153,36 @@ namespace XRL.World.Parts.Mutation
             {
                 if (Head.Equipped != null)
                 {
-                    Physics.ApplyExplosion(currentCell, GetForce(Level, Charges), usedCells, hit, true, true, ParentObject, GetDamage(Level, Charges), 1, false, false, 2);
+                    Physics.ApplyExplosion(C: currentCell,
+                     Force: GetForce(Level, Charges),
+                      UsedCells: usedCells,
+                       Hit: hit,
+                        Local: true,
+                         Show: true,
+                          Owner: ParentObject,
+                           BonusDamage: GetDamage(Level, Charges),
+                            Phase: 1,
+                             Neutron: false,
+                              Indirect: false,
+                               DamageModifier: 2);
                     AddPlayerMessage("Your helmet obstructs the energy of the beam--it explodes in your face!");
                     return;
                 }
             }
             if (ParentObject.HasEffect("Dazed") || ParentObject.HasEffect("Confused"))
             {
-                Physics.ApplyExplosion(currentCell, GetForce(Level, Charges), usedCells, hit, true, true, ParentObject, GetDamage(Level, Charges), 1, false, false, 2);
+                Physics.ApplyExplosion(C: currentCell,
+                 Force: GetForce(Level, Charges),
+                  UsedCells: usedCells,
+                   Hit: hit,
+                    Local: true,
+                     Show: true,
+                      Owner: ParentObject,
+                       BonusDamage: GetDamage(Level, Charges),
+                        Phase: 1,
+                         Neutron: false,
+                          Indirect: false,
+                           DamageModifier: 2);
                 AddPlayerMessage("You lack the concentration to hold your focus! The collected energy explodes in your face!");
                 return;
             }
@@ -512,8 +539,8 @@ namespace XRL.World.Parts.Mutation
                 GainPSiFocus.AddMutation("FocusPsi", 1);
                 //AddPlayerMessage("Has Focus Psi.");
             }
-            this.CombustionBlastActivatedAbilityID = base.AddMyActivatedAbility("fire volley", "CommandCombustionBlast", "Mental Mutation", null, "*", null, false, false, false, false, false);
-            this.CombustionBlastVolleyActivatedAbilityID = base.AddMyActivatedAbility("quick fire", "CommandQuickFire", "Mental Mutation", null, "*", null, false, false, false, false, false);
+            this.CombustionBlastActivatedAbilityID = base.AddMyActivatedAbility(Name: "fire volley", Command: "CommandCombustionBlast", Class: "Mental Mutation", Icon: "*");
+            this.CombustionBlastVolleyActivatedAbilityID = base.AddMyActivatedAbility(Name: "quick fire", Command: "CommandQuickFire", Class: "Mental Mutation", Icon: "*");
             this.ChangeLevel(Level);
             return base.Mutate(GO, Level);
         }

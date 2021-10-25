@@ -18,12 +18,8 @@ namespace XRL.World.Parts.Mutation
         public Guid ActivatedAbilitiesID;
         public int DVModifier;
         public int ACModifier;
-        public int OldDVModifier;
-        public int OldACModifier;
         public int ArmorDVModifier;
         public int ArmorACModifier;
-        public int OldArmorDVModifier;
-        public int OldArmorACModifier;
         public List<string> SynergyMutations = new List<string>()
         {
             "GelatinousFormAcid",
@@ -63,6 +59,7 @@ namespace XRL.World.Parts.Mutation
             Object.RegisterPartEvent(this, "ObjectEnteredAdjacentCell");
             Object.RegisterPartEvent(this, "EnteredCell");
             Object.RegisterPartEvent(this, "AIGetOffensiveMutationList");
+            Object.RegisterPartEvent(this, "EndTurn");
 
             base.Register(Object);
         }
@@ -80,12 +77,13 @@ namespace XRL.World.Parts.Mutation
 
                 firstPart.DefaultBehaviorBlueprint = "Serpentine Tail";
                 firstPart.DefaultBehavior = SerpentileTail;
-                // this.ParentObject.FireEvent(Event.New("CommandForceEquipObject", "Object", this.SerpentileTail, "BodyPart", firstPart).SetSilent(true));
-                // Armor part = this.SerpentileTail.GetPart<Armor>();
-                // part.AV = this.ACModifier;
-                // part.DV = this.DVModifier;
+
             }
-            this.ActivatedAbilitiesID = base.AddMyActivatedAbility("Constrict", "CommandConstrict", "Physical Mutation", "Coil around and crush your enemies.", "@", null, false, false, false, false, false);
+            else
+            {
+                return false;
+            }
+            this.ActivatedAbilitiesID = base.AddMyActivatedAbility(Name: "Constrict", Command: "CommandConstrict", Class: "Physical Mutation", Description: "Coil around and crush your enemies.", Icon: "@");
             this.ChangeLevel(Level);
             return base.Mutate(GO, Level);
         }
@@ -117,27 +115,25 @@ namespace XRL.World.Parts.Mutation
         public override string GetDescription()
         {
             return "A long, thick prehensile tail has replaced your legs. You now slither instead of walk and can constrict foes and prey alike in a deadly coil.\n"
-                    + "\n{{white|+100 Reputation with}} {{violet|unshelled reptiles.}}"
-                    + "\n{{white|-200 Reputation with}} {{violet|apes.}}";
+                    + "\n{{cyan|+100 Reputation with}} {{cyan|unshelled reptiles.}}"
+                    + "\n{{cyan|-200 Reputation with}} {{cyan|apes.}}";
         }
         public override string GetLevelText(int Level)
         {
-            if (Level < 1)
-                return "";
+            if (Level == base.Level)
+                return "{{gray|Movement Speed:}} {{cyan|-5\n}}"
+                + "{{gray|DV Bonus:}} {{cyan|" + Level / 2 + "\n}}"
+                + "{{gray|Swimming Speed increased by {{cyan|50%}}}}\n"
+                + "\n"
+                + "{{cyan|Constrict:}} Constrict enemies, opposing foe must make Toughness Saving Throw, upon failing they are constricted.\n"
+                + "Escape Save: {{cyan|" + (10 + Level) + "}} (STR Modifier Included.)\n";
+
             else
-                return "{{white|Movement Speed:}} -5\n"
-                + "{{white|DV Bonus:}} " + Level / 2 + "\n"
-                + "{{white|Swimming Speed increased by 50%}}\n"
-                + "\n"
-                + "{{white|Constrict:}} Constrict enemies, opposing foe must make Toughness Saving Throw, upon failing they are constricted.\n"
-                + "\n"
-                + "While constricted, foe cannot move and takes your STR modifier per turn in damage plus the mutation's level.\n"
-                + "\n"
-                + "Escape Save: " + 10 + " + " + Level + " + Your STR Modifier.\n"
-                + "[Slime Body, and Quills or Scales, provide extra damage on constriction.]";
-            // Write in ProcessTurnCostricted, IF statement before PerformDamage, use check has these mutations,
-            // then add to damage using Method ExtraMutationsDamage or something, and assign damage on bool, but don't return
-            // So that ProcessDamage still fires off. 
+            {
+                return "{{gray|DV Bonus:}} {{cyan|" + Level / 2 + "\n}}"
+                + "Escape Save increased to: {{cyan|" + (10 + Level) + "}} (STR Modifier Included.)\n";
+            }
+
         }
         public override bool WantEvent(int ID, int cascade)
         {
@@ -217,6 +213,21 @@ namespace XRL.World.Parts.Mutation
                 if (Constricted != null && !ParentObject.pBrain.HasGoal("FleeLocation"))
                 {
                     ParentObject.pBrain.Goals.Clear();
+                }
+
+            }
+            else if (E.ID == "EndTurn")
+            {
+                try
+                {
+                    if (Constricted.HasEffect("Constricted"))
+                    {
+                        PerformDamage(Constricted);
+                    }
+                }
+                catch
+                {
+
                 }
             }
             else if (E.ID == "ObjectEnteredAdjacentCell")
@@ -326,14 +337,14 @@ namespace XRL.World.Parts.Mutation
             {
 
                 AddPlayerMessage("You strangle your enemy with miasmic poisons, dealing extra damage!");
-                Target.TakeDamage(PermutationDamagGFP(), Message: "from %t coils", Attributes: null, DeathReason: "Crushed to death by muscled coiling.", Owner: ParentObject, Attacker: ParentObject);
+                Target.TakeDamage(PermutationDamagGFP(), Message: "from %t coils", Attributes: "Poison", DeathReason: "Crushed to death by muscled coiling.", Owner: ParentObject, Attacker: ParentObject);
                 PerformDamage(Target);
             }
             else if (HasPermutation(ParentObject) == true && HasSynergyMutation.HasMutation("GelatinousFormAcid") == true)
             {
 
                 AddPlayerMessage("You strangle your enemy with your acidic form dealing extra damage!");
-                Target.TakeDamage(PermutationDamagGFA(), Message: "from %t coils", Attributes: null, DeathReason: "Crushed to death by muscled coiling.", Owner: ParentObject, Attacker: ParentObject);
+                Target.TakeDamage(PermutationDamagGFA(), Message: "from %t coils", Attributes: "Acid", DeathReason: "Crushed to death by muscled coiling.", Owner: ParentObject, Attacker: ParentObject);
                 PerformDamage(Target);
             }
             else if (Synergies >= 1)
@@ -402,9 +413,8 @@ namespace XRL.World.Parts.Mutation
                     return false;
                 }
             }
-            // AddPlayerMessage("Phase: 1");
-            // !Target.CanChangeMovementMode("Constricted", false, true, false) 
-            if (!Target.CanChangeBodyPosition("Constricted", false, true, false))
+
+            if (!Target.CanChangeBodyPosition("Constricted", false, true, false) && !Target.IsFrozen())
             {
                 if (ParentObject.IsPlayer())
                 {
@@ -422,7 +432,7 @@ namespace XRL.World.Parts.Mutation
                 }
                 return false;
             }
-            // AddPlayerMessage("Phase: 2");
+
             if (!Target.PhaseAndFlightMatches(ParentObject))
             {
                 return false;
@@ -432,15 +442,14 @@ namespace XRL.World.Parts.Mutation
             {
                 return false;
             }
-            // AddPlayerMessage("Phase: 4");
+
             Cell currentCell = ParentObject.pPhysics.CurrentCell;
-            // AddPlayerMessage("Phase: 5");
+
             if (currentCell == null)
             {
                 return false;
             }
             // Save vs constriction
-            // AddPlayerMessage("Phase: 6");
             if (ResistanceSave(Target))
             {
                 // AddPlayerMessage("Phase: 6a");
@@ -499,8 +508,7 @@ namespace XRL.World.Parts.Mutation
                 }
                 return false;
             }
-            // AddPlayerMessage("Phase: 12");
-            // CheckEnterDamage(Target, false);
+
             string verb = "are";
             string preposition = "constricted by";
             GameObject parentObject = ParentObject;
@@ -533,20 +541,41 @@ namespace XRL.World.Parts.Mutation
         }
         public bool PerformDamage(GameObject Target)
         {
-            string Damage = "1d4+" + ParentObject.Statistics["Strength"].Modifier + "+" + Level;
-            if (string.IsNullOrEmpty(Damage))
+            if (ParentObject.Statistics["Strength"].Modifier < 0)
             {
-                return false;
+                string Damage = "1d4+" + ParentObject.Statistics["Strength"].Modifier + "+" + Level;
+                if (string.IsNullOrEmpty(Damage))
+                {
+                    return false;
+                }
+                Damage damage = new Damage(Rules.Stat.Roll(Damage));
+                // damage.AddAttributes(DamageAttributes);
+                Event @event = Event.New("TakeDamage", 0, 0, 0);
+                @event.AddParameter("Damage", damage);
+                @event.AddParameter("Owner", ParentObject);
+                @event.AddParameter("Attacker", ParentObject);
+                @event.AddParameter("Message", "from %O!");
+                bool flag = Target.FireEvent(@event);
+                return flag;
             }
-            Damage damage = new Damage(Rules.Stat.Roll(Damage));
-            // damage.AddAttributes(DamageAttributes);
-            Event @event = Event.New("TakeDamage", 0, 0, 0);
-            @event.AddParameter("Damage", damage);
-            @event.AddParameter("Owner", ParentObject);
-            @event.AddParameter("Attacker", ParentObject);
-            @event.AddParameter("Message", "from %O!");
-            bool flag = Target.FireEvent(@event);
-            return flag;
+            else
+            {
+                string Damage = "1d4+" + 1 + "+" + Level;
+                if (string.IsNullOrEmpty(Damage))
+                {
+                    return false;
+                }
+                Damage damage = new Damage(Rules.Stat.Roll(Damage));
+                // damage.AddAttributes(DamageAttributes);
+                Event @event = Event.New("TakeDamage", 0, 0, 0);
+                @event.AddParameter("Damage", damage);
+                @event.AddParameter("Owner", ParentObject);
+                @event.AddParameter("Attacker", ParentObject);
+                @event.AddParameter("Message", "from %O!");
+                bool flag = Target.FireEvent(@event);
+                return flag;
+            }
+
         }
         public override bool Render(RenderEvent E)
         {

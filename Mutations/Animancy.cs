@@ -11,7 +11,6 @@ namespace XRL.World.Parts.Mutation
     {
         public bool ProccedAnimaBonus = false;
         public int FactorIncreaseHolder = 0;
-        public const string MOD_PREFIX = "Animancy";
 
         public Animancy()
         {
@@ -23,7 +22,7 @@ namespace XRL.World.Parts.Mutation
         }
         public override string GetLevelText(int Level)
         {
-            return "Effect: " + (10 + Level - 1) + "% chance to gain bonus experience points, this mutation grants more experience at 10th Level.";
+            return "Effect: {{cyan|" + (10 + Level - 1) + "%}} chance to gain bonus experience points, this mutation grants more experience at 10th Level.";
         }
 
         public override bool AllowStaticRegistration()
@@ -62,15 +61,11 @@ namespace XRL.World.Parts.Mutation
 
             if (SavantChance <= 10 + this.Level - 1)
             {
-                // AddPlayerMessage("Unedited XP Award : " + E.Amount);
-                // AddPlayerMessage("Previous EXP : " + ParentObject.Statistics["XP"].Value);
-
                 ProccedAnimaBonus = true;
                 FactorIncreaseHolder = AnimaMultiplier.Next(2, 7);
 
                 E.Amount = currentXPAward * FactorIncreaseHolder;
 
-                // AddPlayerMessage("Edited XP Award : " + E.Amount);
                 if (this.Level >= 10 && Stat.Random(1, 100) <= 10)
                 {
                     int BaseBonusExpAward = currentXPAward * FactorIncreaseHolder;
@@ -88,7 +83,6 @@ namespace XRL.World.Parts.Mutation
             if (ProccedAnimaBonus == true && E.Actor.IsPlayer())
             {
                 AddPlayerMessage("{{blue|You receive a gift from the anima.}} " + "(x" + FactorIncreaseHolder + ")");
-                // AddPlayerMessage("New Total EXP : " + ParentObject.Statistics["XP"].Value);
                 ProccedAnimaBonus = false;
             }
 

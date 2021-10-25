@@ -10,23 +10,17 @@ using XRL.Core;
 namespace XRL.World.Parts.Mutation
 {
     [Serializable]
-    public class GelatinousFormSlime : BaseMutation
+    public class GelatinousFormSlime : BaseDefaultEquipmentMutation
     {
         public int nRegrowCount;
         public int nNextLimb = 1000;
-        public int Pairs = 1;
-        public List<int> myLimbs = new List<int>(5);
-        public List<int> myOldLimbs;
         public string SlimePool = "SlimePool";
+        public string ManagerID => ParentObject.id + "::GelatinousFormSlime";
         public int Density = 1;
-        public int PsuedopodID = 0;
-        public int OldArmID = 0;
-        public int OldHandID = 0;
         public Guid ActivatedAbilityID = Guid.Empty;
-        public int Duration;
         public GelatinousFormSlime()
         {
-            DisplayName = "Gelatinous Form {{light green|(Slime)}}";
+            DisplayName = "Gelatinous Form {{slimy|(Slime)}}";
         }
 
         public override bool CanLevel()
@@ -70,21 +64,25 @@ namespace XRL.World.Parts.Mutation
 
         public override string GetDescription()
         {
-            return "You lack a muscuskeletal system, your genome chose an amorphous eukaryote's physique. Yours is especially {{light green|slimy.}}";
+            return "You lack a muscuskeletal system, your genome chose an amorphous eukaryote's physique. Yours is especially {{slimy|slimy.}}";
         }
 
         public override string GetLevelText(int Level)
         {
             string text = string.Empty;
-            if (Level > 1)
-                return "";
-            else if (Level == base.Level)
+
+            if (Level == base.Level)
             {
-                text += "You gain a 25% damage resistance bonus to melee weapons.\n";
+                text += "You gain a {{cyan|25%}} damage resistance bonus to melee weapons.\n";
                 text += "Take more damage from projectiles and explosives.\n";
                 text += "When dealt damage, there's a random chance you bleed slime in a random tile around you.\n";
-                text += "\nYou can spit slime at your foes.\n";
-                text += "+200 rep with {{blue|oozes}}\n";
+                text += "\nYou can spit slime at your foes.\n\n";
+                text += "{{cyan|+200 reputation with oozes}}\n";
+            }
+            else
+            {
+                text += "Increased density of slime release upon being struck.\n";
+                text += "You regenerate lost limbs more quickly.\n";
             }
             return text;
         }
@@ -95,11 +93,11 @@ namespace XRL.World.Parts.Mutation
             {
                 Damage parameter = E.GetParameter("Damage") as Damage;
                 if (parameter.HasAttribute("Slashing"))
-                    parameter.Amount = (int)((double)parameter.Amount * (0.25 * (int)Math.Ceiling((Decimal)Level / new Decimal(2))));
+                    parameter.Amount -= (int)((double)parameter.Amount * (0.25 * (int)new Decimal(2)));
                 else if (parameter.HasAttribute("Melee"))
-                    parameter.Amount = (int)((double)parameter.Amount * (0.25 * (int)Math.Ceiling((Decimal)Level / new Decimal(2))));
+                    parameter.Amount -= (int)((double)parameter.Amount * (0.25 * (int)new Decimal(2)));
                 else if (parameter.HasAttribute("Ranged"))
-                    parameter.Amount = (int)((double)parameter.Amount * (1 + (0.25 * (int)Math.Ceiling((Decimal)Level / new Decimal(2)))));
+                    parameter.Amount += (int)((double)parameter.Amount * (0.25 * (int)new Decimal(2)));
 
                 if (ParentObject.CurrentCell != null && parameter.Amount != 0)
                 {
@@ -110,7 +108,13 @@ namespace XRL.World.Parts.Mutation
                         if (!cell.IsOccluding() && Stat.Random(1, 100) <= 10 + (5 * Level / 2))
                         {
                             GameObject SlimeContainer = GameObject.create(this.SlimePool);
-                            cell.AddObject(SlimeContainer, true, false, false, false, null);
+                            var SlimeProperties = SlimeContainer.GetPart<LiquidVolume>();
+                            SlimeProperties.Volume *= Level;
+                            cell.AddObject(GO: SlimeContainer,
+                                            Forced: true,
+                                            System: false,
+                                            IgnoreGravity: false,
+                                            NoStack: false);
                         }
                     }
                 }
@@ -166,11 +170,50 @@ namespace XRL.World.Parts.Mutation
             }
             return base.FireEvent(E);
         }
+        public void AddSlimeGlobul()
+        {
+            Body SourceBody = ParentObject.GetPart("Body") as Body;
+            if (SourceBody != null)
+            {
+                BodyPart ReadyBody = SourceBody.GetBody();
+                var AttatchPseudotemplate = ReadyBody.AddPartAt(
+                    Base: "Oral Arm",
+                    Laterality: Laterality.UPPER,
+                    Manager: ManagerID,
+                    OrInsertBefore: new string[1]
+                {
+                "Head",
+                });
+                if (Stat.Random(1, 100) <= 50)
+                {
+                    var mBodyPart = AttatchPseudotemplate.AddPart(
+                        Base: "Pseudopod",
+                        Laterality: Laterality.UPPER,
+                        DefaultBehavior: "Slime_Humor_Pseudopod",
+                        Manager: ManagerID);
+                    mBodyPart.DefaultBehaviorBlueprint = "Slime_Humor_Pseudopod";
+                }
+                else
+                {
+                    var mBodyPart = AttatchPseudotemplate.AddPart(
+                       Base: "Tentacle",
+                       Laterality: Laterality.UPPER,
+                       DefaultBehavior: "Slime_Humor_Tentacle",
+                       Manager: ManagerID);
+                    mBodyPart.DefaultBehaviorBlueprint = "Slime_Humor_Tentacle";
+                }
+            }
+            SourceBody.UpdateBodyParts();
+        }
         public override bool Mutate(GameObject GO, int Level)
         {
             Unmutate(GO);
             ParentObject.SetStringProperty("BleedLiquid", "Slime-1000");
-            ActivatedAbilityID = AddMyActivatedAbility("Spit Slime", "CommandSpitSlime", "Physical Mutation", null, "*", null, false);
+            ActivatedAbilityID = AddMyActivatedAbility(Name: "Spit Slime", Command: "CommandSpitSlime", Class: "Physical Mutation", Icon: "*");
+            if (!ParentObject.HasIntProperty("Slimewalking"))
+            {
+                ParentObject.SetIntProperty("Slimewalking", 1);
+            }
             return base.Mutate(GO, Level);
         }
 
@@ -184,7 +227,5 @@ namespace XRL.World.Parts.Mutation
         {
             return base.WantEvent(ID, cascade) || ID == EquippedEvent.ID || ID == ObjectEnteredCellEvent.ID || ID == ObjectEnteringCellEvent.ID;
         }
-
-
     }
 }

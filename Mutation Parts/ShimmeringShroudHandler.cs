@@ -123,7 +123,7 @@ namespace XRL.World.Parts
                 {
                     if (Defender == ParentObject
                     && E.Weapon.HasPart("DischargeOnHit")
-                    || WeaponMeleeHook.Element == "Electric"
+                    || WeaponMeleeHook.Attributes == "Electric"
                     || ProjectileHook.Attributes == "Electric")
                     {
                         ElectroHook.Potency += E.Damage.Amount / 3;
@@ -373,14 +373,12 @@ namespace XRL.World.Parts
 
                     if (ElectroHook.ShowMutationUpdates == true)
                     {
-                        //blocking things hurt them
                         Popup.Show("You can now call a great lightning strike on your enemies at the cost of Potency. \n\n\n [To deactivate these messages, toggle the Electrokenisis Prompts in the Command menu to OFF.]");
                         EndedOnMessage = true;
                     }
                 }
                 else if (ElectroHook.Potency > 60 && ParentObject.HasEffect("ShimmeringShroud"))
                 {
-                    // AddPlayerMessage("Step 11c");
                     EndedOnMessage = false;
                 }
 

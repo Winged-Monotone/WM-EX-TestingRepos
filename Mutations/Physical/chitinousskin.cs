@@ -13,32 +13,22 @@ namespace XRL.World.Parts.Mutation
         public int STRBonus;
         public Guid ActivatedAbilityID = Guid.Empty;
         public int totalTurnsTilMolt;
-        // int DoubleCheckDuration = 10;
         public int ImmobilityDuration = 0;
-
-
-        // this is the constructor
+        public bool HasSaproStyme = false;
+        public GameObject FungalLimbNode;
 
 
         public ChitinousSkin()
         {
             this.DisplayName = "Chitinous Skin";
             turnsTilMolt = (int)Stat.GaussianRandom(36001.0f, 7766.40641657f);
-            // turnsTilMolt = 10;
             totalTurnsTilMolt = turnsTilMolt;
         }
-
-
-        // This a method, this allows me set whether a mutation levels.
-
 
         public override bool CanLevel()
         {
             return true;
         }
-
-
-        // This is a method that is called by the game, it allows me to register events, and these events already exist, they are here to update the mutation, it calls the fire event method, using else if (E.ID == "PutEventIDHere") variable, it allows me to register event id's to listen to, they do not have to be already existing events.
 
         public override bool AllowStaticRegistration()
         {
@@ -54,59 +44,44 @@ namespace XRL.World.Parts.Mutation
             go.RegisterPartEvent((IPart)this, "CommandMolting");
             go.RegisterPartEvent((IPart)this, "CommandMolt");
             go.RegisterPartEvent((IPart)this, "CommandChitinHarden");
+            go.RegisterPartEvent((IPart)this, "Unequipped");
         }
-
-        // this method calls the descriptor of the mutation seen in the mutation description.
 
         public override string GetDescription()
         {
-            return "You bear chitinous flesh, as if incased in lacquered leather--you're resistant to physical attacks, but dread its compromise.\n";
+            return "You bear chitinous flesh, as if incased in lacquered leather--you're resistant to physical attacks, but dread its compromise.\n\n"
+                + "Your chitinous form gives you a strong, durable body increasing your AV and strength. You molt periodically, losing your armor bonus for some time but gain a small bonus to movement speed. You are more susceptible to poison, venom and disease.\n\n"
+                + "{{cyan|+100}} reputation with &Cinsects&y, &Ccrabs&y and &Carachnids&y";
         }
-
-        // this gets the description of the mutation and shows the mutations changes overtime with each level both in the effects list, and the mutation select screen.
 
         public override string GetLevelText(int Level)
         {
-            // the 'return' gives a description "+" being that is adds the (object) which is the mutation itself, plus the "1" integer Math.Ceiling((Decimal) (Level / 2))), in plain english its + whatever it is divided by 2 and then rounded up and then added to the av/n value descripter. Math.Ceiling((Decimal) is representitive of rounding up. \n denounces a new line in the description.
-
 
             int Math1 = (int)Math.Ceiling((Decimal)(Level / 2));
-            int Math2 = (int)Math.Ceiling((Decimal)(Level / 2));
 
-            if (ParentObject != null)
-                return "Your chitinous form gives you a strong, durable body. You molt periodically, losing your armor bonus for some time but gaining a small bonus to movement speed. You however are more susceptible to poison, venom and disease."
-                            + "+100 reputation with &Cinsects&y and &Carachnids&y";
-            else
-                return "+" + (object)(1 + Math1) + " AV\n"
-                + "+" + (object)(1 + Math1) + " Strength Score\n"
-                + "-" + (object)(3 + Math2) + " to saves vs. Disease\n"
-                + "Take " + (object)(10 * Math1) + "% more Poison Damage\n"
-                + "You molt periodically, losing your armor bonus for a small period at the cost of a small bonus to movement speed.\n"
-                + "+100 reputation with &Cinsects&y, &Ccrabs&y and &Carachnids&y\n";
+            return "+{{cyan|" + (object)(1 + Math1) + "}} AV\n"
+           + "+{{cyan|" + (object)(1 + Math1) + "}} Strength Score\n"
+           + "-{{cyan|" + (object)(3 + Math1) + "}} to saves vs. Disease\n"
+           + "Take {{cyan|" + (object)(Math1 + 1) + "x}} more Poison Damage\n";
         }
 
-        // the method to call for the E.ID registers that were registered above. Everytime an event list an ID in the registry list, it will call it.
         public void GetMutationTimerAssistant()
         {
             if (turnsTilMolt == totalTurnsTilMolt * 0.9 && IsPlayer())
             {
                 AddPlayerMessage("{{green|You note your new skin feels unencumbering and wellworn.}}");
-                // XDidY(ParentObject, "{{green|note}}", "{{green|new skin feels unencumbering and wellworn.}}", ".", Color: "green", SubjectPossessedBy: ParentObject);
             }
             else if (turnsTilMolt == totalTurnsTilMolt * 0.7 && IsPlayer())
             {
                 AddPlayerMessage("{{yellow|You note your skin's segmented clusters clamber a little as you move about.}}");
-                // XDidY(ParentObject, "{{yellow|note}}", "{{yellow|skin's segmented clusters clamber a little as you move about.}}", ".", Color: "yellow", SubjectPossessedBy: ParentObject);
             }
             else if (turnsTilMolt == totalTurnsTilMolt * 0.3 && IsPlayer())
             {
                 AddPlayerMessage("{{orange|Your chitin armor feels heavy and aged.}}");
-                // XDidY(ParentObject, "{{orange|note}}", "{{orange|skin's segmented clusters clamber a little as you move about.}}", ".", Color: "orange", SubjectPossessedBy: ParentObject);
             }
             else if (turnsTilMolt == totalTurnsTilMolt * 0.1 && IsPlayer())
             {
                 AddPlayerMessage("{{red|Your chitin skin is beginning to impede your movements, it'll be ready to molt soon.}}");
-                // XDidY(ParentObject, "{{red|chitin skin is beginning to impede}}", "{{orange|impede your movements, it'll be ready to molt soon.}}", ".", Color: "red", SubjectPossessedBy: ParentObject);
             }
         }
 
@@ -146,22 +121,21 @@ namespace XRL.World.Parts.Mutation
 
         public override bool FireEvent(Event E)
         {
-            // This event calls the AIGetPassiveMutationList event, in this specific event, it controls how AI's passively use certain abilities, traits excedra which are randomly assigned to various mutants-- the second line after the call assigns activatedabilities to pilesOfAbilities and then sets them to equal parentobject.GetPart<ActivatedAbilities>(), the line after is a bool that is "if pileofabilities does not exist, which calls to look at the acitvated abilities, and then it checks if the specific mutation which is assigned its own specail ID in the GUID section of the add abilities list, exist. Iy will then add the command to the ai with the E.AddAICommand, with the string and an integer denoting its priority.
-            //Modifydefending save calls for a longer set of commands. essentially it reads as Call event (E.ID) ModifyDefendingSave and then E(Event). Get string, "VS," which denounces the string, string-null,(only if it has one). Contains "Disease.
-            //The next parameterter sets up the roll, the int turns roll into an integer that is equivelent to the event.getintparameter which calls for a string, in this case, roll, (I forget the int Paramter)
             if (E.ID == "ModifyDefendingSave" && E.GetStringParameter("Vs", (string)null).Contains("Disease"))
             {
-                int roll = E.GetIntParameter("Roll", 0) - (3 + (int)Math.Ceiling((Decimal)this.Level / new Decimal(3)));
+                int ParameterSum = (3 + (int)Math.Ceiling((Decimal)this.Level / new Decimal(3)));
+                int roll = E.GetIntParameter("Roll", 0) - ParameterSum;
+
                 E.SetParameter("Roll", roll);
             }
-
             else if (E.ID == "BeforeApplyDamage")
             {
-                Damage parameter = E.GetParameter("Damage") as Damage;
-                if (parameter.HasAttribute("Poison"))
-                    parameter.Amount = (int)((double)parameter.Amount * (1 + (0.10 * (int)Math.Ceiling((Decimal)Level / new Decimal(2)))));
-            }
+                Damage eDamage = E.GetParameter("Damage") as Damage;
+                int ParameterAmount = (int)((double)eDamage.Amount * (((Level / 2) + 1)));
 
+                if (eDamage.HasAttribute("Poison"))
+                { eDamage.Amount = ParameterAmount; }
+            }
             else if (E.ID == "EndTurn")
             {
                 if (turnsTilMolt > 0)
@@ -176,7 +150,7 @@ namespace XRL.World.Parts.Mutation
                         ParentObject.ApplyEffect(new EncumberingHusk());
 
                         ActivatedAbilities activatedAbilities = ParentObject.GetPart("ActivatedAbilities") as ActivatedAbilities;
-                        this.ActivatedAbilityID = activatedAbilities.AddAbility("Molt", "CommandMolt", "Physical Mutation", "Molts your Husk.", "(Z)", null, false, false, false, false, false, false, false, false);
+                        this.ActivatedAbilityID = activatedAbilities.AddAbility(Name: "Molt", Command: "CommandMolt", Class: "Physical Mutation", Description: "Molts your Husk.", Icon: "(Z)");
                     }
                 }
                 if (ImmobilityDuration > 0 && ParentObject.HasEffect("Immobilized"))
@@ -187,10 +161,44 @@ namespace XRL.World.Parts.Mutation
                         ParentObject.RemoveEffect("EncumberingHusk", false);
                     }
                 }
+
+                var ParsBody = ParentObject.Body.GetParts();
+
+                foreach (var B in ParsBody)
+                {
+
+                    if (B != null && B.Equipped != null)
+                    {
+                        // AddPlayerMessage("Passed Null Check");
+                        if (B.Equipped.HasPropertyOrTag("FungalInfection"))
+                        {
+                            // AddPlayerMessage("Adding Sapro");
+                            FungalLimbNode = B.Equipped;
+                            HasSaproStyme = true;
+                            // AddPlayerMessage("Fungal Limb Found :" + FungalLimbNode);
+                        }
+                        if (FungalLimbNode != null && HasSaproStyme == true)
+                        {
+                            // AddPlayerMessage("Fungal Node Adding Effect");
+                            if (!ParentObject.HasEffect("Saprostymie"))
+                            {
+                                ParentObject.ApplyEffect(new Saprostymie(9999));
+                            }
+                        }
+                        else if (FungalLimbNode == null)
+                        {
+                            // AddPlayerMessage("Fungal Node Removing Effect");
+                            if (ParentObject.HasEffect("Saprostymie"))
+                            {
+                                ParentObject.RemoveEffect("Saprostymie");
+                            }
+                        }
+                    }
+                    // AddPlayerMessage("Leaving Sapro Loop");
+                }
+                FungalLimbNode = null;
                 GetMutationTimerAssistant();
             }
-
-
             else if (E.ID == "CommandMolt")
             {
                 if (!this.ParentObject.pPhysics.CurrentCell.ParentZone.IsWorldMap())
@@ -228,12 +236,12 @@ namespace XRL.World.Parts.Mutation
                     Popup.Show("You must stop travelling before you can molt.");
                 }
             }
-
             else if (E.ID == "CommandChitinHarden")
             {
                 turnsTilMolt = (int)Stat.GaussianRandom(360001.0f, 77664.06416574f);
                 // turnsTilMolt = 10;
                 totalTurnsTilMolt = turnsTilMolt;
+
             }
 
             return base.FireEvent(E);
@@ -242,10 +250,13 @@ namespace XRL.World.Parts.Mutation
         public override bool ChangeLevel(int NewLevel)
         {
             StatShifter.DefaultDisplayName = "Chitin Skin";
+
             avBonus = 1 + (int)Math.Ceiling((Decimal)(NewLevel / 2));
-            StatShifter.SetStatShift(target: ParentObject, statName: "AV", amount: avBonus, baseValue: true);
             STRBonus = 1 + (int)Math.Ceiling((Decimal)(NewLevel / 2));
+
+            StatShifter.SetStatShift(target: ParentObject, statName: "AV", amount: avBonus, baseValue: true);
             StatShifter.SetStatShift(target: ParentObject, statName: "Strength", amount: STRBonus, baseValue: true);
+
             if (ParentObject.HasEffect("SoftChitin"))
             {
                 SoftChitin effect = ParentObject.GetEffect("SoftChitin") as SoftChitin;
@@ -259,6 +270,7 @@ namespace XRL.World.Parts.Mutation
         {
             avBonus = 1 + (int)Math.Ceiling((Decimal)(Level / 2));
             STRBonus = 1 + (int)Math.Ceiling((Decimal)(Level / 3));
+
             StatShifter.SetStatShift(target: ParentObject, statName: "AV", amount: avBonus, baseValue: true);
             StatShifter.SetStatShift(target: ParentObject, statName: "Strength", amount: STRBonus, baseValue: true);
             return true;

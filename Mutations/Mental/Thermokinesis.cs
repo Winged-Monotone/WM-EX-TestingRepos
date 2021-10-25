@@ -139,15 +139,21 @@ namespace XRL.World.Parts.Mutation
                 var ParentsEgo = ParentObject.Statistics["Ego"].Modifier;
                 MaximumRadius = 1 + Level;
 
-                return "Alter the resistances of creatures at your will, or change the ambient temperature of an area around you."
-              + "Charge Potency towards Resistance Alteration: " + "{{M|" + ParentsEgo + "}}" + " * " + "{{B|Charges}}\n"
-              + "Charge Potency towards Ambient Temperature Manipulation: " + "{{W|" + 250 + "}}" + " * " + "{{B|Charges}}\n\n"
-              + "Save Target Vs' Negative Resistance Changes: " + "{{B|" + (10 + ParentsEgo + Level) + "}}"
-              + "Maximum Radius: " + MaximumRadius;
+                if (Level == base.Level)
+                    return "Alter the resistances of creatures at your will, or change the ambient temperature of an area around you.\n"
+                  + "Charge Potency towards Resistance Alteration: " + "{{cyan|" + ParentsEgo + "}}" + " * " + "{{cyan|Charges}}\n"
+                  + "Charge Potency towards Ambient Temperature Manipulation: " + "{{cyan|" + 250 + "}}" + " * " + "{{cyan|Charges}}\n\n"
+                  + "Save Target Vs' Negative Resistance Changes: " + "{{cyan|" + (10 + ParentsEgo + Level) + "}}\n"
+                  + "Maximum Radius: {{cyan|" + MaximumRadius + "}}";
+                else
+                    return "Save Target Vs' Negative Resistance Changes: " + "{{cyan|" + (10 + ParentsEgo + Level) + "}}\n"
+                      + "Maximum Radius: {{cyan|" + MaximumRadius + "}}";
+
+
             }
             catch
             {
-                return "Alter the resistances of creatures at your will, or change the ambient temperature of an area around you. The Range and area-effect of the ability scales as Thermokinesis increases in level.\n";
+                return "Alter the resistances of creatures at your will, or change the ambient temperature of an area around you. The range and area-effect of the ability scales as Thermokinesis increases in level.\n";
             }
         }
 
@@ -411,7 +417,7 @@ namespace XRL.World.Parts.Mutation
                 GainPSiFocus.AddMutation("FocusPsi", 1);
                 //AddPlayerMessage("Has Focus Psi.");
             }
-            this.ActivateThermokinesisAbilityID = base.AddMyActivatedAbility("Alter Temperatures", "CommandAlterTemperatures", "Mental Mutation", null, "*", null, false, false, false, false, false);
+            this.ActivateThermokinesisAbilityID = base.AddMyActivatedAbility(Name: "Alter Temperatures", Command: "CommandAlterTemperatures", Class: "Mental Mutation", Icon: "*");
             this.ChangeLevel(Level);
             return base.Mutate(GO, Level);
         }

@@ -1,3 +1,4 @@
+using AiUnity.NLog.Core.LayoutRenderers;
 using Qud.API;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace XRL.World.Parts.Mutation
         public int PsiCost;
         public int NewPsiCost;
         public int WeaponCounter = 0;
+        // private int TensPlaceOfLevel = 0;
         public Guid ManifestPsiWeaponActivatedAbilityID;
         public Guid ReturnPsiWeaponActivatedAbilityID;
         public string PsiWeaponsID => ParentObject.id + "::Psychomaterialus" + WeaponCounter;
@@ -147,7 +149,7 @@ namespace XRL.World.Parts.Mutation
                     return "{{zetachrome|Zetachrome}}";
                 }
             }
-            return null;
+            return "{{brown| Bronze}}";
         }
         public string GetWeaponTileColor(string colorChoice)
         {
@@ -843,6 +845,7 @@ namespace XRL.World.Parts.Mutation
         public Psychomateriartis()
         {
             this.DisplayName = "Psychomateriartus";
+            this.Type = "Mental";
         }
         public override bool AllowStaticRegistration()
         {
@@ -852,20 +855,42 @@ namespace XRL.World.Parts.Mutation
         {
             return "Conjure your thoughtstuff, and materialize weapons as sharp as your mind.\n"
                 + "\n"
-                + "{{light blue|+50 reputation the Seekers of the Sightless Way.\n\n}}";
+                + "{{cyan|+50 reputation the Seekers of the Sightless Way.}}";
         }
         public override string GetLevelText(int Level)
         {
-            if (ParentObject != null)
-                return "";
-            else if (Level < 9)
-                return "{{gray|Materialize psionic weaponry, psionic weaponry gains bonus penetration equivocal to your ego modifier and the mutations' ego magnitude. Psionic arms are bonded to its wielder, you may return your first materialized weapon to your hand as long as you are in the same zone and the weapon hasn't been destroyed.}}\n\n"
-                + "Current Ego Magnitude: {{B|0." + Level + "0}}\n"
-                + "Current Weapon Level: {{B|" + GetPsychoMatLevel() + "}}\n";
+            string ConvertedLevelString = Level.ToString();
+            if (Level == base.Level)
+            {
+                if (Level <= 9)
+                {
+
+                    return "{{gray|Materialize psionic weaponry, psionic weaponry gains bonus penetration equivocal to your ego modifier and the mutations' ego magnitude. Psionic arms are bonded to its wielder, you may return your first materialized weapon to your hand as long as you are in the same zone and the weapon hasn't been destroyed.}}"
+
+                   + "\n\nEgo Magnitude: {{cyan|0." + Level + "}}\n"
+                   + "Weapon Level: {{cyan|" + GetPsychoMatLevel() + "}}\n";
+                }
+                else
+                {
+                    return "{{gray|Materialize psionic weaponry, psionic weaponry gains bonus penetration equivocal to your ego modifier and the mutations' ego magnitude. Psionic arms are bonded to its wielder, you may return your first materialized weapon to your hand as long as you are in the same zone and the weapon hasn't been destroyed.}}"
+
+                   + "\n\nEgo Magnitude: {{cyan|" + ConvertedLevelString.Insert(1, ".") + "}}\n"
+                   + "Weapon Level: {{cyan|" + GetPsychoMatLevel() + "}}\n";
+                }
+            }
             else
-                return "{{gray|Materialize psionic weaponry, psionic weaponry gains bonus penetration equivocal to your ego modifier and the mutations' ego magnitude. Psionic arms are bonded to its wielder, you may return your first materialized weapon to your hand as long as you are in the same zone and the weapon hasn't been destroyed.}}\n\n"
-                + "Current Ego Magnitude: {{B|0." + Level + "0}}\n"
-                + "Current Weapon Level: {{B|" + GetPsychoMatLevel() + "}}\n";
+            {
+                if (Level <= 9)
+                {
+                    return "Increased Ego Magnitude: {{cyan|0." + Level + "}}\n"
+                    + "Increased Weapon Level: {{cyan|" + GetPsychoMatLevel() + "}}\n";
+                }
+                else
+                {
+                    return "Increased Ego Magnitude: {{cyan|" + ConvertedLevelString.Insert(1, ".") + "}}\n"
+                    + "Increased Weapon Level: {{cyan|" + GetPsychoMatLevel() + "}}\n";
+                }
+            }
         }
         public override bool Mutate(GameObject GO, int Level)
         {
@@ -880,8 +905,8 @@ namespace XRL.World.Parts.Mutation
                 GainPSiFocus.AddMutation("FocusPsi", 1);
             }
 
-            this.ManifestPsiWeaponActivatedAbilityID = base.AddMyActivatedAbility("Psi-Forge", "ManifestWeaponCommand", "Mental Mutation", "Manifest or dismiss a psionic weapon.\n\n");
-            this.ReturnPsiWeaponActivatedAbilityID = base.AddMyActivatedAbility("Return Psi-Weapon", "ReturnWeaponCommand", "Mental Mutation", "Rematerialize your last previously crafted psi-arm to your hand so long as you are in the same parasang, this is a turnless action.", "\u03A9");
+            this.ManifestPsiWeaponActivatedAbilityID = base.AddMyActivatedAbility(Name: "Psi-Forge", Command: "ManifestWeaponCommand", Class: "Mental Mutation", Description: "Manifest or dismiss a psionic weapon.\n\n");
+            this.ReturnPsiWeaponActivatedAbilityID = base.AddMyActivatedAbility(Name: "Return Psi-Weapon", Command: "ReturnWeaponCommand", Class: "Mental Mutation", Description: "Rematerialize your last previously crafted psi-arm to your hand so long as you are in the same parasang, this is a turnless action.", Icon: "\u03A9");
 
             return base.Mutate(GO, Level);
         }

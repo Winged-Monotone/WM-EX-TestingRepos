@@ -26,13 +26,14 @@ namespace XRL.World.Parts.Mutation
         {
             return "Your body is lined with elegant blades of cartiligenic ridges.\n\n"
 
-            + "{{B|+100 Reputation with Fish.}}";
+            + "{{cyan|+100}} Reputation with Fish."
+
+            + "\n\nYou have fins that aid in swimming.";
         }
 
         public override string GetLevelText(int Level)
         {
-            return "You have fins that aid in swimming.\n"
-            + "Swimming penalty reduced by: {{B|" + (Level * 10) + "%}} ";
+            return "Swimming penalty reduced by: {{cyan|" + (Level * 10) + "%}} ";
         }
 
         public override bool WantEvent(int ID, int cascade)
@@ -56,9 +57,6 @@ namespace XRL.World.Parts.Mutation
 
         public override bool Mutate(GameObject GO, int Level)
         {
-            // if (ParentObject != null)
-            // { XRL.Core.XRLCore.Core.Game.PlayerReputation.modify("Fish", 100, false); }
-
             return base.Mutate(GO, Level);
         }
     }

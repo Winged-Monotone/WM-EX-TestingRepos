@@ -39,8 +39,8 @@ namespace XRL.World.Parts.Mutation
         {
             return "Your incredible psionic power comes at the cost of overwhelming the stability of your physical form, you are doomed to hunting down physical husk to maintain your tether to this reality, albeit the magnitude of your psionic abilities are of a realm of its own.\n"
                 + "\n"
-                + "{{orange|-400 reputation with highly entropic beings.\n}}"
-                + "{{light blue|+400 reputation the Seekers of the Sightless Way.\n}}";
+                + "{{cyan|-400 reputation with highly entropic beings.\n}}"
+                + "{{cyan|+400 reputation the Seekers of the Sightless Way.\n}}";
         }
         public override string GetLevelText(int Level)
         {
@@ -66,7 +66,7 @@ namespace XRL.World.Parts.Mutation
             }
 
             ActivatedAbilities activatedAbilities = ParentObject.GetPart("ActivatedAbilities") as ActivatedAbilities;
-            this.ActivatedAbilityID = activatedAbilities.AddAbility("Soulshunt", "CommandSoulShunt", "Mental Mutation", "Shunt the imprints of your victims' mind from their body, and assume the throne of their vessel.\n\n" + "Target makes a Willpower saving-throw vs your Ego Modifier {{light blue|(+10)}} or be shunted from its body; you assume control of the target's body permanently. Your new husk will wither over time. On a successful soulshunt you gain a 10% chance to increase your ego score by {{light blue|1}}." + "\n\n{{dark gray|Base cooldown: 2400}}", "(O)", null, false, false, false, false, false, false, false, false, -1);
+            this.ActivatedAbilityID = activatedAbilities.AddAbility(Name: "Soulshunt", Command: "CommandSoulShunt", Class: "Mental Mutation", Description: "Shunt the imprints of your victims' mind from their body, and assume the throne of their vessel.\n\n" + "Target makes a Willpower saving-throw vs your Ego Modifier {{cyan|(+10)}} or be shunted from its body; you assume control of the target's body permanently and its INT, WIL, and EGO become your own. Your new husk will wither over time. On a successful soulshunt you have a {{cyan|10%}} chance to increase your ego score by {{cyan|1}}." + "\n\n{{dark gray|Base cooldown: 2400}}", Icon: "(O)", Cooldown: -1);
             return base.Mutate(GO, Level);
         }
 
@@ -188,7 +188,7 @@ namespace XRL.World.Parts.Mutation
                 int OwnersLevel = ParentObject.Stat("Level");
                 int TargetsLevel = TargetHusk.Stat("Level");
 
-                var LevelDifference = TargetsLevel - OwnersLevel;
+                var LevelDifference = OwnersLevel - TargetsLevel;
 
 
                 if (!TargetHusk.MakeSave("Willpower", 8 + LevelDifference, ParentObject, "Ego", ParentObject.It + " attempted to shunt " + TargetHusk.Its + " mind from " + TargetHusk.Its + " body.", false, false, false, false))
@@ -286,7 +286,6 @@ namespace XRL.World.Parts.Mutation
 
                 if (!ParentObject.MakeSave("Toughness", (28 + DegradateLevel), null, null, "Husk Deterioration"))
                 {
-                    // StatShifter.SetStatShift(ParentObject, "Hitpoints", -Stat.Random(0, 3), true);
                     ParentObject.Statistics["Hitpoints"].BaseValue -= Stat.Random(0, 3);
                 }
             }
@@ -421,7 +420,7 @@ namespace XRL.World.Parts.Mutation
                 {
                     try
                     {
-                        XRL.Core.XRLCore.Core.Game.PlayerReputation.modify(PrimaryFaction, -CreatureTier * 50, true);
+                        XRL.Core.XRLCore.Core.Game.PlayerReputation.modify(NewBodyPrimaryFaction, -CreatureTier * 50, true);
                     }
                     catch
                     {
@@ -431,9 +430,6 @@ namespace XRL.World.Parts.Mutation
 
                 if (OriginalBody != null)
                 {
-
-                    // AddPlayerMessage("Original Body: " + OriginalBody + ".");
-                    // AddPlayerMessage("Parent Body: " + ParentObject + ".");
 
                     if (!ParentObject.HasProperName)
                     {

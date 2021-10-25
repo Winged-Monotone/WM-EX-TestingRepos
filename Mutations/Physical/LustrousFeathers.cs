@@ -3,11 +3,11 @@ using System;
 namespace XRL.World.Parts.Mutation
 {
     [Serializable]
-    public class RoughScales : BaseMutation
+    public class LustrousFeathers : BaseMutation
     {
-        public RoughScales()
+        public LustrousFeathers()
         {
-            this.DisplayName = "Rough Scales";
+            this.DisplayName = "Lustrously Feathered";
         }
 
         public override bool CanLevel()
@@ -26,14 +26,14 @@ namespace XRL.World.Parts.Mutation
 
         public override string GetDescription()
         {
-            return "You are covered in rough articulated scales.";
+            return "You are decorated in lustrous feathers.";
         }
 
         public override string GetLevelText(int Level)
         {
-            return "{{cyan|+1}} AV\n"
-            + "{{cyan|+5}} Acid Resistance\n"
-            + "{{cyan|+100}} reputation with &Cunshelled reptiles";
+            return "{{cyan|+1}} DV\n"
+            + "{{cyan|+5}} Cold Resistance\n"
+            + "{{cyan|+100}} reputation with &CBirds&y";
         }
 
         public override bool FireEvent(Event E)
@@ -48,13 +48,13 @@ namespace XRL.World.Parts.Mutation
 
         public override bool Mutate(GameObject GO, int Level)
         {
-            if (GO.Statistics.ContainsKey("AV"))
+            if (GO.Statistics.ContainsKey("DV"))
             {
-                StatShifter.SetStatShift("AV", 1);
+                StatShifter.SetStatShift("DV", 1);
             }
-            if (GO.Statistics.ContainsKey("AcidResistance"))
+            if (GO.Statistics.ContainsKey("ColdResistance"))
             {
-                GO.Statistics["AcidResistance"].BaseValue += 5;
+                GO.Statistics["ColdResistance"].BaseValue += 5;
             }
 
             return base.Mutate(GO, Level);

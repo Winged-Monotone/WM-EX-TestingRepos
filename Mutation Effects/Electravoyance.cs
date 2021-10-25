@@ -12,9 +12,7 @@ namespace XRL.World.Effects
     public class Electravoyance : Effect
     {
         public bool bIdentified;
-
         public int Level = 1;
-
         public GameObject Listener;
 
         public Electravoyance()
@@ -88,7 +86,7 @@ namespace XRL.World.Effects
         {
             if (bIdentified && GameObject.validate(ref Listener) && Listener.IsPlayer() && AutoAct.IsInterruptable() && !AutoAct.IsGathering() && Listener.IsRelevantHostile(base.Object))
             {
-                IComponent<GameObject>.AddPlayerMessage(Listener.GenerateSpotMessage(base.Object, null, "sense"));
+                IComponent<GameObject>.AddPlayerMessage(Listener.GenerateSpotMessage(base.Object, null));
                 AutoAct.Interrupt();
             }
         }

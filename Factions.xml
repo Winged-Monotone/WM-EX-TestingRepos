@@ -7,10 +7,24 @@
 		<partreputation About="ChitinousSkin" Value="100" />
 	</faction>
 
-	<faction Name="Seekers" Load="Merge">
-		<partreputation About="PsychoplethoricDeterioration" Value="400" />
-		<partreputation About="Sciophagia" Value="100" />
+	<faction Name="Crabs" Load="Merge">
+		<partreputation About="ChitinousSkin" Value="100" />
+	</faction>
 
+	<faction Name="highly entropic beings" Load="Merge">
+		<partreputation About="PsychoplethoricDeterioration" Value="-400" />
+	</faction>
+
+
+	<faction Name="Birds" Load="Merge">
+		<partreputation About="LustrousFeathers" Value="100" />
+	</faction>
+
+
+	<faction Name="Seekers" Load="Merge">
+		<partreputation About="PsychoplethoricDeterioration" Value="100" />
+		<partreputation About="Sciophagia" Value="100" />
+		<partreputation About="Umbramaeum" Value="-200" />
 	</faction>
 
 	<faction Name="Unshelled Reptiles" Load="Merge">
@@ -31,11 +45,10 @@
 		<partreputation About="GelatinousFormAcid" Value="200" />
 		<partreputation About="GelatinousFormSlime" Value="200" />
 
-
 	</faction>
 
 	<faction Name="Frogs" Load="Merge">
-		<partreputation About="Gills" Value="100" />
+		<partreputation About="wmGills" Value="100" />
 	</faction>
 
 	<faction Name="Fish" Load="Merge">
