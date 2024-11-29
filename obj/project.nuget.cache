@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "dgOfl9BV5vWtrpzXS8aVEw8gn4CBFJukMtxCECJCHLexGsOLWnpYIOOa8ibEpm0RBPcKWc52WFJHFTyd++kUbQ==",
+  "success": true,
+  "projectFilePath": "c:\\Users\\lawre\\AppData\\LocalLow\\Freehold Games\\CavesOfQud\\Mods\\WMTEST MUTS\\wmCSProf.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\lawre\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\lawre\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
